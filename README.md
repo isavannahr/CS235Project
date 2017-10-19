@@ -1,4 +1,4 @@
-#Does an increase in gun laws have an effect on the amount of gun violence in the US?
+# Does an increase in gun laws have an effect on the amount of gun violence in the US?
 Given gun violence and gun control data from the United States we will use association, 
 clustering, sequential patterns and outlier detection to determine whether the number of gun 
 control laws in a state has an effect on gun violence. 
@@ -12,11 +12,11 @@ information on state specific gun regulations in conjunction with data sets on g
 each state to determine if there is a correlation between gun laws and gun violence in this 
 country.
 
-#Databases
+# Databases
 
-#Steps
+# Steps
 
-#Works Cited
+# Works Cited
 
 McClenathan J., Pahn M., Siegel M. 2016. “The Changing Landscape of U.S. Gun Policy: State Firearm Laws, 1991–2016.” Boston University School of Public Health.
 
