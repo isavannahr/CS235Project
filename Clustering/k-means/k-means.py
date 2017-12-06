@@ -92,7 +92,7 @@ def k_means(count_xy ,k):
 
     #Intialize k random centroids to represent each cluster
     centroids = randomize_centroids(count_xy,k)
-    plot_initial_centroids(count_xy, centroids)
+    #plot_initial_centroids(count_xy, centroids)
 
     # Initialize
     iterations = 0
@@ -136,28 +136,28 @@ def plot(data,final_centroids, nearest_centroid ):
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
     plt.scatter(final_centroids[:, 0], final_centroids[:, 1], c='r', s=100)
-    plt.savefig("finalclusters_two.png")
-    #plt.show()
-    plt.close()
+    #plt.savefig("Plots/finalclusters_two_2016.png")
+    plt.show()
+    #plt.close()
 
 def plot_initial_centroids(data, centroids):
     plt.scatter(data[:, 0], data[:, 1])
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
     plt.scatter(centroids[:, 0], centroids[:, 1], c='r', s=100)
-    plt.savefig("initialcentroids_two.png")
+    plt.savefig("Plots/initialcentroids_two_2016.png")
     plt.close()
 
-    #plt.show()
+    plt.show()
 
 def initial_plot_two_clusters(data):
     plt.scatter(data[:, 0], data[:, 1])
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
     ax = plt.gca()
-    ax.add_patch(mpatches.Circle([17, 8], radius = 4, fill=False, lw=3, color= "r"))
-    ax.add_patch(mpatches.Circle([78, 16], radius = 4, fill=False, lw=3, color= "r"))
-    plt.savefig("twocentroidguess.png")
+    ax.add_patch(mpatches.Circle([20, 10], radius = 4, fill=False, lw=3, color= "r"))
+    ax.add_patch(mpatches.Circle([90, 20], radius = 4, fill=False, lw=3, color= "r"))
+    plt.savefig("Plots/twocentroidguess_2016.png")
     #plt.show()
     plt.close()
 
@@ -170,7 +170,7 @@ def initial_plot_three_clusters(data):
     ax.add_patch(mpatches.Circle([17, 8], radius=4, fill=False, lw=3, color="r"))
     ax.add_patch(mpatches.Circle([83, 34], radius=4, fill=False, lw=3, color="r"))
     ax.add_patch(mpatches.Circle([74, 7], radius=4, fill=False, lw=3, color="r"))
-    plt.savefig("threecentroidguess.png")
+    plt.savefig("Plots/threecentroidguess.png")
     plt.close()
 
     #plt.show()
@@ -179,7 +179,7 @@ def initial_plot(data):
     plt.scatter(data[:, 0], data[:, 1])
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
-    plt.savefig("IntitialPlot.png")
+    plt.savefig("Plots/IntitialPlot_2016.png")
     plt.close()
     #plt.show()
 
@@ -187,8 +187,8 @@ def initial_plot(data):
 if __name__ == '__main__':
 
     #Files
-    gunlaw_counts_file = "NumGunLawsByState_Cleaned.xlsx"
-    massshooting_counts_file = "MassShootings_Cleaned.xlsx"
+    gunlaw_counts_file = "../../ToyDatasets/NumGunLawsByState_Cleaned_2016.xlsx"
+    massshooting_counts_file = "../../ToyDatasets/MassShootings_Cleaned_2016.xlsx"
 
     #Read Files into Dictionary
     gunlawCounts_perStateYearDict = read_file(gunlaw_counts_file, 1)
@@ -199,10 +199,10 @@ if __name__ == '__main__':
     count_xy = merge_data(gunlawCounts_perStateYearDict, massshootingCounts_perStateYearDict)
 
     #Plot to pick k
-    initial_plot(count_xy)
+    #initial_plot(count_xy)
 
     #Visualize where you think clusters are
-    initial_plot_two_clusters(count_xy)
+    #initial_plot_two_clusters(count_xy)
     #initial_plot_three_clusters(count_xy)
 
     #2 clusters
@@ -210,6 +210,7 @@ if __name__ == '__main__':
     plot(count_xy, final_centroids, nearest_centroid)
 
     # 3 clusters
-    # k_means(count_xy, 3)
+    #final_centroids, nearest_centroid = k_means(count_xy, 3)
+    #plot(count_xy, final_centroids, nearest_centroid)
 
 
