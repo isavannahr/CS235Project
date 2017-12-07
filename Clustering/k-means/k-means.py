@@ -1,49 +1,49 @@
 #Isavannah Reyes
 #K-means of mass shooting and gun law data
 
-import xlrd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 MAX_ITERATIONS = 20
 
-#Pre: String, int
+#Pre: String
 #Post: Dict
-def read_file(filename, sheet = 1):
-    '''Reads a specific sheet of an excel file and outputs a dictionary of
+def read_file(filename):
+    '''Reads csv file and outputs a dictionary of
     states_year as a key and the counts as a value'''
 
-    #File must be in excel file
-    assert filename.endswith(".xlsx") , "File must be an Excel file (.xlsx)!!!!"
+    with open(filename) as file:
+        #Skip header and get column names
+        column_names = file.readline().strip().split(',')
 
-    #Intialize
-    countsDict = {}
+        # Column names all lowercase
+        column_names = [title.lower() for title in column_names]
 
-    #Open specific sheet specified
-    xl_workbook = xlrd.open_workbook(filename)
-    xl_sheet = xl_workbook.sheet_by_index(sheet - 1)
+        #State and Year index to format key in dictionary
+        state_index = column_names.index("state")
+        year_index = column_names.index("year")
 
-    #Column names all lowercase
-    column_names = [title.lower() for title in (xl_sheet.row_values(0, 0, 3))]
+        # Intialize
+        countsDict = {}
 
-    #Stat and Year index to format key in dictionary
-    state_index = column_names.index("state")
-    year_index = column_names.index("year")
+        # Iterate through rows
+        for line in file:  # each line in file
 
-    #Iterate through rows
-    for row in range(1, xl_sheet.nrows):
+            #Get all items in row into a list
+            line_item_list = line.strip().split(',')
 
-        #Get state as a string
-        state = str(xl_sheet.row_values(row,state_index,state_index+1)[0])
-        #Year as a string
-        year = str(xl_sheet.row_values(row, year_index,year_index+1)[0])[0:4]
+            #Get state as a string
+            state = str(line_item_list[state_index])
+            #Year as a string
+            year = str(line_item_list[year_index])
 
-        #Save in state_year column
-        state_year = state + "_" + year
+            #Save in state_year column
+            state_year = state + "_" + year
 
-        #Save counts as key for specific state_year
-        countsDict[state_year] = xl_sheet.row_values(row, 2)[0]
+            # Save counts as key for specific state_year
+            #Count will be last column
+            countsDict[state_year] = int(line_item_list[-1])
 
     return countsDict
 
@@ -145,8 +145,8 @@ def plot_initial_centroids(data, centroids):
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
     plt.scatter(centroids[:, 0], centroids[:, 1], c='r', s=100)
-    plt.savefig("Plots/initialcentroids_two_2016.png")
-    plt.close()
+    #plt.savefig("Plots/initialcentroids_two_2016.png")
+    #plt.close()
 
     plt.show()
 
@@ -155,11 +155,11 @@ def initial_plot_two_clusters(data):
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
     ax = plt.gca()
-    ax.add_patch(mpatches.Circle([20, 10], radius = 4, fill=False, lw=3, color= "r"))
-    ax.add_patch(mpatches.Circle([90, 20], radius = 4, fill=False, lw=3, color= "r"))
-    plt.savefig("Plots/twocentroidguess_2016.png")
-    #plt.show()
-    plt.close()
+    ax.add_patch(mpatches.Circle([18, 8], radius = 4, fill=False, lw=3, color= "r"))
+    ax.add_patch(mpatches.Circle([80, 20], radius = 4, fill=False, lw=3, color= "r"))
+    #plt.savefig("Plots/twocentroidguess.png")
+    plt.show()
+    #plt.close()
 
 
 def initial_plot_three_clusters(data):
@@ -170,32 +170,31 @@ def initial_plot_three_clusters(data):
     ax.add_patch(mpatches.Circle([17, 8], radius=4, fill=False, lw=3, color="r"))
     ax.add_patch(mpatches.Circle([83, 34], radius=4, fill=False, lw=3, color="r"))
     ax.add_patch(mpatches.Circle([74, 7], radius=4, fill=False, lw=3, color="r"))
-    plt.savefig("Plots/threecentroidguess.png")
-    plt.close()
+    #plt.savefig("Plots/threecentroidguess.png")
+    #plt.close()
 
-    #plt.show()
+    plt.show()
 
 def initial_plot(data):
     plt.scatter(data[:, 0], data[:, 1])
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
-    plt.savefig("Plots/IntitialPlot_2016.png")
-    plt.close()
-    #plt.show()
+    #plt.savefig("Plots/IntitialPlot_2016.png")
+    #plt.close()
+    plt.show()
 
 
 if __name__ == '__main__':
 
     #Files
-    gunlaw_counts_file = "../../ToyDatasets/NumGunLawsByState_Cleaned_2016.xlsx"
-    massshooting_counts_file = "../../ToyDatasets/MassShootings_Cleaned_2016.xlsx"
+    gunlaw_counts_file = "../../ToyDatasets/num_gun_laws_by_state_per_year_2016.csv"
+    massshooting_counts_file = "../../ToyDatasets/mass_shootings_2016.csv"
 
     #Read Files into Dictionary
-    gunlawCounts_perStateYearDict = read_file(gunlaw_counts_file, 1)
-    massshootingCounts_perStateYearDict = read_file(massshooting_counts_file, 1)
+    gunlawCounts_perStateYearDict = read_file(gunlaw_counts_file)
+    massshootingCounts_perStateYearDict = read_file(massshooting_counts_file)
 
-    #Merge two dictionaries into one by key
-    #Get data without state_year lablels for clustering
+    #Get data without state_year lablels for clustering as numpy 2d array
     count_xy = merge_data(gunlawCounts_perStateYearDict, massshootingCounts_perStateYearDict)
 
     #Plot to pick k
