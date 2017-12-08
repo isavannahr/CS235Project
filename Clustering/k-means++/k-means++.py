@@ -1,49 +1,49 @@
 #Isavannah Reyes
 #K-means++ partitioning of mass shooting and gun law data
 
-import xlrd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+import random
 
 MAX_ITERATIONS = 20
 
-#Pre: String, int
+#Pre: String
 #Post: Dict
-def read_file(filename, sheet = 1):
-    '''Reads a specific sheet of an excel file and outputs a dictionary of
+def read_file(filename):
+    '''Reads csv file and outputs a dictionary of
     states_year as a key and the counts as a value'''
 
-    #File must be in excel file
-    assert filename.endswith(".xlsx") , "File must be an Excel file (.xlsx)!!!!"
+    with open(filename) as file:
+        #Skip header and get column names
+        column_names = file.readline().strip().split(',')
 
-    #Intialize
-    countsDict = {}
+        # Column names all lowercase
+        column_names = [title.lower() for title in column_names]
 
-    #Open specific sheet specified
-    xl_workbook = xlrd.open_workbook(filename)
-    xl_sheet = xl_workbook.sheet_by_index(sheet - 1)
+        #State and Year index to format key in dictionary
+        state_index = column_names.index("state")
+        year_index = column_names.index("year")
 
-    #Column names all lowercase
-    column_names = [title.lower() for title in (xl_sheet.row_values(0, 0, 3))]
+        # Intialize
+        countsDict = {}
 
-    #Stat and Year index to format key in dictionary
-    state_index = column_names.index("state")
-    year_index = column_names.index("year")
+        # Iterate through rows
+        for line in file:  # each line in file
 
-    #Iterate through rows
-    for row in range(1, xl_sheet.nrows):
+            #Get all items in row into a list
+            line_item_list = line.strip().split(',')
 
-        #Get state as a string
-        state = str(xl_sheet.row_values(row,state_index,state_index+1)[0])
-        #Year as a string
-        year = str(xl_sheet.row_values(row, year_index,year_index+1)[0])[0:4]
+            #Get state as a string
+            state = str(line_item_list[state_index])
+            #Year as a string
+            year = str(line_item_list[year_index])
 
-        #Save in state_year column
-        state_year = state + "_" + year
+            #Save in state_year column
+            state_year = state + "_" + year
 
-        #Save counts as key for specific state_year
-        countsDict[state_year] = xl_sheet.row_values(row, 2)[0]
+            # Save counts as key for specific state_year
+            #Count will be last column
+            countsDict[state_year] = int(line_item_list[-1])
 
     return countsDict
 
@@ -72,77 +72,132 @@ def randomize_first_centroid(data):
     #Return first row of randomized data
     return centroids[:1]
 
-
-#Pre: nparray, k: [[gun_laws, mass_shootings],[x,y]...]
-#Post: nparray k rows 2 columns of centroid points
-def k_means_pp(count_xy ,k):
-    '''Uses mass shooting and gun law counts to cluster the data
-    into k partitions'''
-
-    #Intialize 1 random centroid and declare it the first centroid
-    first_centroid = randomize_first_centroid(count_xy)
+def initialize_centroids(count_xy, k):
+    # Intialize 1 random centroid and declare it the first centroid
+    centroids = randomize_first_centroid(count_xy)
 
     # Extend centroid an extra dimension, to allow for efficient operation using numpy broadcasting
     # Essentially going to find the closest distance to centroids by perferming operatons on whole operations
-    first_centroid_extended = first_centroid[:, np.newaxis]
+    centroids = centroids[:, np.newaxis]
 
-    #Initialize
+    # Initialize
     i = 1
     while i < k:
         i += 1
 
-        #Distance
-        diff = count_xy - first_centroid_extended
+        # Distance
+        diff = count_xy - centroids
         # Get distance between all points and centroid one
-        all_distances = np.sqrt(((diff)**2).sum(axis=2))
+        all_distances = np.sqrt(((diff) ** 2).sum(axis=2))
 
-
-        #Square Distances
+        # Square Distances
         all_distances_sq = np.square(all_distances)
-        print(all_distances_sq)
 
+        # get minimum distance from all centroids
+        all_distances_sq = np.amin(all_distances_sq, axis=0)
 
-    ####################
-    #oldCentroids = np.zeros((k,2))
+        # Select a Random point with probability propotional to the square distance and set it as the next centroid
+        probability = all_distances_sq / all_distances_sq.sum()
 
-    #Repeat until cluster points dont change
-    #while not shouldStop(oldCentroids, centroids, iterations):
+        # Get cumulative probability of choosing all points
+        # Returns an array from [0,10
+        cumulative_prob = probability.cumsum()
 
-        #oldCentroids = centroids
+        # Choose random value from [0,1]
+        r = random.random()
 
+        # Find the first index of the point correspnding to r in cumulative prob
+        # This is our new random centroid
+        ind = np.where(cumulative_prob >= r)[0][0]
+        new_centroid = np.array([[count_xy[ind]]])
+
+        # Get new centroid
+        centroids = np.append(centroids, new_centroid, axis=0)
+
+    return centroids
+
+#Pre: numpy array, numpy array, iterations
+#Post: boolean, should k-means stop
+def shouldStop(oldCentroids, centroids, iterations):
+    '''Returns True or False if kmeans iterations should stop
+    based on if centroids have changed or not'''
+
+    if np.array_equal(oldCentroids, centroids):
+        return True
+    elif iterations > MAX_ITERATIONS:
+        return True
+    else:
+        return False
+
+#Pre: nparray, k: [[gun_laws, mass_shootings],[x,y]...]
+#Post: nparray k rows 2 columns of centroid points
+def k_means_pp(count_xy ,k, plot_name):
+    '''Uses mass shooting and gun law counts to cluster the data
+    into k partitions'''
+
+    centroids = initialize_centroids(count_xy,k)
+    #plot_initial_centroids(count_xy, centroids, plot_name)
+
+    # Initialize
+    iterations = 0
+    oldCentroids = np.zeros((k, 2))
+
+    # Repeat until cluster points dont change
+    while not shouldStop(oldCentroids, centroids, iterations):
+        oldCentroids = centroids
+        iterations += 1
+
+        diff = count_xy - centroids
+
+        # Get distance for all points and centroid
+        # [[point1 distance to centroid1, point2 distance to centroid1,...]
+        # [point1 distance to centroid2, point2 distance to centroid2,...],...]
+        all_distances = np.sqrt(((diff) ** 2).sum(axis=2))
 
         # Get the nearest centroid for each point (index of centroids)
         # ie find the smallest value in each column
-        # nearest_centroid = np.argmin(all_distances, axis=0)
-
+        nearest_centroid = np.argmin(all_distances, axis=0)
 
         # Assign new centroids based on which centroid data points are close to
-        #For each centroid get the mean of the points closest to that centroid and assign that to the new centroid
-        #centroids =  np.array([count_xy[nearest_centroid == i].mean(axis=0) for i in range(centroids.shape[0])])
+        # For each centroid get the mean of the points closest to that centroid and assign that to the new centroid
+        centroids = np.array([count_xy[nearest_centroid == i].mean(axis=0) for i in range(centroids.shape[0])])
+        #Add axis for broadcasting
+        centroids = centroids[:, np.newaxis]
 
-    #return centroids, nearest_centroid
-    return 0
+    print("Clutering finished in " + str(iterations) + " iterations.")
+
+    return centroids, nearest_centroid
+
 
 #####PLOTTING FUNCTIONS#########
 
-def plot(data,final_centroids, nearest_centroid ):
+def plot_initial_centroids(data, final_centroids,  plot_name):
+    plt.scatter(data[:, 0], data[:, 1])
+    plt.xlabel("Number of Gun Laws")
+    plt.ylabel("Number of Mass Shootings")
+    plt.scatter(final_centroids[0:, 0][:,0], final_centroids[0:, 0][:,1], c='r', s=100)
+    #plt.savefig(plot_name)
+    #plt.close()
+    plt.show()
+
+def plot(data,final_centroids, nearest_centroid, plot_name):
     plt.scatter(data[:, 0], data[:, 1], c = nearest_centroid, cmap="tab10")
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
-    plt.scatter(final_centroids[:, 0], final_centroids[:, 1], c='r', s=100)
-    #plt.savefig("Plots/finalclusters_two_2016.png")
+    plt.scatter(final_centroids[0:, 0][:,0], final_centroids[0:, 0][:,1], c='r', s=100)
+    #plt.savefig(plot_name)
     plt.show()
     #plt.close()
 
 if __name__ == '__main__':
 
     #Files
-    gunlaw_counts_file = "../../Datasets/NumGunLawsByState_Cleaned.xlsx"
-    massshooting_counts_file = "../../Datasets/MassShootings_Cleaned.xlsx"
+    gunlaw_counts_file = "../../ToyDatasets/num_gun_laws_by_state_per_year_2016.csv"
+    massshooting_counts_file = "../../ToyDatasets/mass_shootings_2016.csv"
 
     #Read Files into Dictionary
-    gunlawCounts_perStateYearDict = read_file(gunlaw_counts_file, 1)
-    massshootingCounts_perStateYearDict = read_file(massshooting_counts_file, 1)
+    gunlawCounts_perStateYearDict = read_file(gunlaw_counts_file)
+    massshootingCounts_perStateYearDict = read_file(massshooting_counts_file)
 
     #Merge two dictionaries into one by key
     #Get data without state_year lablels for clustering
@@ -156,11 +211,11 @@ if __name__ == '__main__':
     #initial_plot_three_clusters(count_xy)
 
     #2 clusters
-    final_centroids, nearest_centroid = k_means_pp(count_xy, 2)
-    #plot(count_xy, final_centroids, nearest_centroid)
+    final_centroids, nearest_centroid = k_means_pp(count_xy, 2,"Plots/initialcentroids_two_2016.png")
+    plot(count_xy, final_centroids, nearest_centroid, "Plots/finalcentroids_two_2016.png")
 
     # 3 clusters
-    #final_centroids, nearest_centroid = k_means(count_xy, 3)
-    #plot(count_xy, final_centroids, nearest_centroid)
+    #final_centroids, nearest_centroid = k_means_pp(count_xy, 3,"Plots/initialcentroids_three_2016.png")
+    #plot(count_xy, final_centroids, nearest_centroid,"Plots/finalcentroids_three_2016.png")
 
 
