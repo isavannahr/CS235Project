@@ -43,22 +43,45 @@ def main_association():
   for i,v in array_gl.items():
      array_support[i]={}
      for j,x in v.items():
-       if j!='lawtotal':
+       if j!='lawtotal' and j!='mass_shootings':
          y=float(array_gl[i]['mass_shootings'])
+         if x>y:
+           t=y
+         else:
+           t=x
          if y>0:
-           array_support[i][j]=(float(x)/y)
+           array_support[i][j]=(float(t)/y)
          elif y<1:
            array_support[i][j]='N/A'
          elif x<1:
            array_support[i][j]=0
          else:
-           array_support[i][j]=(float(x)/float(y))
+           array_support[i][j]=(float(t)/float(y))
        
 
-  f = open('association_output.csv','w')
-  f.write('year,state,gun_law_type,support\n');
+  f = open('output_association.csv','w')
+  f2 = open('more_laws_than_shootings.csv','w')
+  f3 = open('more_shootings_than_laws.csv','w')
+  f.write('year,state,gun_law_type,num_laws,num_mass_shootings,support_by_law_type\n');
+  f2.write('year,state,num_laws,num_mass_shootings,overall_support\n');
+  f3.write('year,state,num_laws,num_mass_shootings,overall_support\n');
   for i,v in array_support.items():
     for j,x in v.items():
       line_arr=i.split('-')
-      f.write(str(line_arr[0])+','+str(line_arr[1])+','+str(j)+','+str(x)+'\n')
-         
+      num_laws=array_gl[i][j]
+      totallaws=int(array_gl[i]['lawtotal'])
+      num_ms=int(array_gl[i]['mass_shootings'])
+      if float(num_ms)>0:
+        if totallaws>num_ms:
+          t=num_ms
+        else:
+          t=totallaws
+        overall_support=float(t)/float(num_ms)
+      else:
+        overall_support='N/A'
+      f.write(str(line_arr[0])+','+str(line_arr[1])+','+str(j)+','+str(num_laws)+','+str(num_ms)+','+str(x)+'\n')
+      if totallaws>num_ms:
+        f2.write(str(line_arr[0])+','+str(line_arr[1])+','+str(totallaws)+','+str(num_ms)+','+str(overall_support)+'\n')
+      if num_ms>=totallaws:
+        f3.write(str(line_arr[0])+','+str(line_arr[1])+','+str(totallaws)+','+str(num_ms)+','+str(overall_support)+'\n')
+      
