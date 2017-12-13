@@ -188,8 +188,8 @@ def state_pair(gunlawCounts, massshootingCounts):
 if __name__ == '__main__':
 
     # get data from the main datasets
-    gunlaw_counts_file = "../../Datasets/num_gun_laws_by_state_per_year.csv"
-    massshooting_counts_file = "../../Datasets/mass_shootings_2014-2017.csv"
+    gunlaw_counts_file = "../Datasets/num_gun_laws_by_state_per_year.csv"
+    massshooting_counts_file = "../Datasets/mass_shootings_2014-2017.csv"
     # gunlaw_counts_file = "num_gun_laws_by_state_per_year.csv"
     # massshooting_counts_file = "mass_shootings_2014-2017.csv"
     gunlawCounts = read_file(gunlaw_counts_file)
