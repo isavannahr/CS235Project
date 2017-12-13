@@ -5,13 +5,13 @@ library(reshape2)
 
 
 # load the data and cast it in cross tab form
-numGunLawsByState <- read_csv("num_gun_laws_by_state_per_year.csv", 
+numGunLawsByState <- read_csv("../Datasets/num_gun_laws_by_state_per_year.csv", 
                               col_types = cols_only(lawtotal = col_guess(), 
                                                     state = col_guess(), year = col_character()))
 gunLawsTabs <- acast(numGunLawsByState, state~year, value.var="lawtotal")
 
 
-massShootings14to17 <- read_csv("mass_shootings_2014-2017.csv", 
+massShootings14to17 <- read_csv("../Datasets/mass_shootings_2014-2017.csv", 
                                 col_types = cols(Year = col_character()))
 massShootingsTabs <- acast(massShootings14to17, State~Year, value.var="Num of Mass Shootings")
 
