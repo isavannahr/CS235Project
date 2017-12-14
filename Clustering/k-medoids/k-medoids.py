@@ -3,7 +3,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 
 MAX_ITERATIONS = 20
 
@@ -59,7 +58,10 @@ def merge_data(gunlawCounts_perStateYearDict, massshootingCounts_perStateYearDic
 
     return np.array(count_xy)
 
+
 def get_nonmedoids(count_xy, medoids):
+    '''Returns non-medoids from count data'''
+    #Masking
     isNonMedoid = np.ones((count_xy.shape[0]), dtype=bool)
     i = 0
     medoids_found = 0
@@ -70,7 +72,6 @@ def get_nonmedoids(count_xy, medoids):
         i += 1
     non_medoids = count_xy[isNonMedoid]
     return non_medoids
-
 
 #Pre: numpy array, numpy array, iterations
 #Post: boolean, should k-means stop
@@ -96,6 +97,7 @@ def randomize_medoids(data, k):
     # Return top k rows of randomized data
     return medoids[:k]
 
+#Caclulate cost of using medoids by adding distances to nearest medoid
 def calculate_cost(nearest_medoid, dist, m ):
 
     cost = 0
@@ -104,7 +106,9 @@ def calculate_cost(nearest_medoid, dist, m ):
         cost += x.sum(axis=0)
     return cost
 
+
 def mask(maskee, check):
+        '''Mask if check is in the maskee'''
         check = check[np.newaxis]
         isInMaskee = np.ones(maskee.shape[0], dtype=bool)
         i = 0
