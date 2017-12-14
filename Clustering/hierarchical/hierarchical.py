@@ -57,10 +57,12 @@ def merge_data(gunlawCounts_perStateYearDict, massshootingCounts_perStateYearDic
     The first is gun law counts and the second is mass shooting counts'''
 
     count_xy = []
+    labels = []
     for key in gunlawCounts_perStateYearDict:
         count_xy.append([gunlawCounts_perStateYearDict[key], massshootingCounts_perStateYearDict[key]])
+        labels.append(key)
 
-    return np.array(count_xy)
+    return np.array(count_xy),labels
 
 def plot_dendrogram(*args, **kwargs):
     max_d = kwargs.pop('max_d', None)
@@ -103,7 +105,7 @@ if __name__ == '__main__':
 
     #Merge two dictionaries into one by key
     #Get data without state_year lablels for clustering
-    count_xy = merge_data(gunlawCounts_perStateYearDict, massshootingCounts_perStateYearDict)
+    count_xy, state_yrs = merge_data(gunlawCounts_perStateYearDict, massshootingCounts_perStateYearDict)
 
     # generate the linkage matrix - determine distances and merger clusters that have the smallest distance
     #each indice is the clusters at that iteration
@@ -131,12 +133,13 @@ if __name__ == '__main__':
     # calculate full dendrogram
     plot_dendrogram(
         Z,
-        truncate_mode='lastp',
-        p=12,
+        #truncate_mode='lastp',
+        #p=12,
         leaf_rotation=90.,
         leaf_font_size=12.,
         show_contracted=True,
         annotate_above=10,
+        labels = state_yrs  ,
         max_d= max_d,  # plot a horizontal cut-off line
     )
 

@@ -109,7 +109,6 @@ def k_means(count_xy ,k):
         centroids_extended =  centroids[:,np.newaxis]
 
         #Euclidan Distance
-
         diff = count_xy - centroids_extended
 
         #Get distance for all points and centroid
@@ -125,6 +124,7 @@ def k_means(count_xy ,k):
         # Assign new centroids based on which centroid data points are close to
         #For each centroid get the mean of the points closest to that centroid and assign that to the new centroid
         centroids =  np.array([count_xy[nearest_centroid == i].mean(axis=0) for i in range(centroids.shape[0])])
+
 
     print("Clutering finished in " + str(iterations) + " iterations.")
     return centroids, nearest_centroid
