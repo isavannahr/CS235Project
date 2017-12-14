@@ -176,6 +176,7 @@ def k_means_pp(count_xy ,k, plot_name):
 #####PLOTTING FUNCTIONS#########
 
 def plot(data,final_centroids, nearest_centroid,outliers,outlier_labels, plot_name):
+    '''Plot outliers'''
     plt.scatter(data[:, 0], data[:, 1], c = nearest_centroid, cmap="tab10")
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
@@ -194,6 +195,7 @@ def plot(data,final_centroids, nearest_centroid,outliers,outlier_labels, plot_na
     plt.show()
 
 def plott(data, final_centroids, nearest_centroid):
+    '''Plot data without outliers'''
     plt.scatter(data[:, 0], data[:, 1], c=nearest_centroid, cmap="tab10")
     plt.xlabel("Number of Gun Laws")
     plt.ylabel("Number of Mass Shootings")
@@ -222,12 +224,15 @@ if __name__ == '__main__':
     #Find outliers
     chosen_cluster_distances = np.array([distances[nearest_centroid[i], i] for i in range(len(nearest_centroid))])
     descending_indices = np.argsort(chosen_cluster_distances)[::-1]
+    #Top two points with farthest distance from closest centroid
     outliers_indices = descending_indices[:2]
     outliers = count_xy[outliers_indices]
     outlier_labels = [labels[i] for i in outliers_indices]
 
+    #Plot outliers
     plot(count_xy, final_centroids, nearest_centroid, outliers,outlier_labels, "outliers.png")
 
+    #Cluster and Plot without outliers
     no_outlier_counts = np.delete(count_xy,outliers_indices, axis = 0)
     final_centroids, nearest_centroid, distances = k_means_pp(no_outlier_counts, 2,"Plots/initialcentroids_two_2016.png")
     plott(no_outlier_counts, final_centroids, nearest_centroid)

@@ -110,22 +110,14 @@ def merge_data(gunlawCounts_perStateYearDict, massshootingCounts_perStateYearDic
 
     return np.array(count_xy),labels
 
-def get_nonmedoids(count_xy, medoids):
-    isNonMedoid = np.ones((count_xy.shape[0]), dtype=bool)
-    i = 0
-    medoids_found = 0
-    while medoids_found != len(medoids):
-        if count_xy[i, :] in medoids:
-            isNonMedoid[i] = False
-            medoids_found += 1
-        i += 1
-    non_medoids = count_xy[isNonMedoid]
-    return non_medoids
-
 def plot_dendrogram(*args, **kwargs):
+    '''Plots Dendogram'''
+
+    #Maxd and title of plot
     max_d = kwargs.pop('max_d', None)
     title = kwargs.pop('title', None)
 
+    #Clusters
     if max_d and 'color_threshold' not in kwargs:
         kwargs['color_threshold'] = max_d
     annotate_above = kwargs.pop('annotate_above', 0)
@@ -155,26 +147,25 @@ if __name__ == '__main__':
     #Options
     np.set_printoptions(precision=5, suppress=True)  # suppress scientific float notation
 
-
     #Files
-    gunlaw_counts_file = "../../Datasets/num_gun_laws_by_state_per_year_2014-2017.csv"
-    massshooting_counts_file = "../../Datasets/mass_shootings_2014-2017.csv"
+    gunlaw_counts_file = "../../ToyDatasets/num_gun_laws_by_state_per_year_2016.csv"
+    massshooting_counts_file = "../../ToyDatasets/mass_shootings_2016.csv"
 
     #Read Files into Dictionary
     gunlawTypeCountspercolumn_perStateYearDict = read_file_mc(gunlaw_counts_file)
     massshootingCounts_perStateYearDict = read_file(massshooting_counts_file)
 
+    #Cluster ammunition regulations
     count_xy, state_yrs = merge_data(gunlawTypeCountspercolumn_perStateYearDict["ammunition_regulations"],
                                      massshootingCounts_perStateYearDict)
+
     # generate the linkage matrix - determine distances and merger clusters that have the smallest distance
     # each indice is the clusters at that iteration
-    # ward = ward variance minimization problem
-    # minimize intra cluster variance in eculidian space (similar to k-means)
 
     c = pdist(count_xy, "jaccard")
     Z = linkage(count_xy, 'complete')
 
-    max_d = 15
+    max_d = 10
     plot_dendrogram(
         Z,
         truncate_mode='lastp',
@@ -188,29 +179,26 @@ if __name__ == '__main__':
         title="Dendogram of Number of Ammunition Regulation Laws vs Number of Mass Shootings"
     )
 
+    #Clusters
     clusters = fcluster(Z, max_d, criterion='distance')
     # print(clusters)#agrees with three clusters
-
+    #Plot according to dendogram clusters
     plt.figure(figsize=(10, 8))
     plt.scatter(count_xy[:, 0], count_xy[:, 1], c=clusters,
                 cmap='tab10')  # plot points with cluster dependent colors
     plt.title("Clusters based on Hierarchical Clustering")
     plt.xlabel("Number of Ammunition Regulation Laws")
     plt.ylabel("Number of Mass Shootings")
-
     plt.show()
 
+    #Cluster concealed_carry_permitting laws
     count_xy, state_yrs = merge_data(gunlawTypeCountspercolumn_perStateYearDict["concealed_carry_permitting"],
                                      massshootingCounts_perStateYearDict)
-    # generate the linkage matrix - determine distances and merger clusters that have the smallest distance
-    # each indice is the clusters at that iteration
-    # ward = ward variance minimization problem
-    # minimize intra cluster variance in eculidian space (similar to k-means)
 
     c = pdist(count_xy, "jaccard")
     Z = linkage(count_xy, 'complete')
 
-    max_d = 21
+    max_d = 10
     plot_dendrogram(
         Z,
         truncate_mode='lastp',
@@ -223,10 +211,9 @@ if __name__ == '__main__':
         max_d=max_d,  # plot a horizontal cut-off line
         title="Dendogram of Number of Concealed Carry Permitting Laws vs Number of Mass Shootings"
     )
-
+    #Clusters
     clusters = fcluster(Z, max_d, criterion='distance')
-    # print(clusters)#agrees with three clusters
-
+    #Plot according to dendorgram clusters
     plt.figure(figsize=(10, 8))
     plt.scatter(count_xy[:, 0], count_xy[:, 1], c=clusters,
                 cmap='tab10')  # plot points with cluster dependent colors
@@ -235,6 +222,8 @@ if __name__ == '__main__':
     plt.ylabel("Number of Mass Shootings")
 
     plt.show()
+
+    #Plot all gun law type dendograms and clusters
     #lawtype= ['domestic_violence', 'preemption', 'immunity', 'dealer_regulations', 'prohibitions_against_high_risk_gun_owners', 'background_checks', 'ammunition_regulations', 'child_access_prevention', 'concealed_carry_permitting', 'assault_weapons_regulations', 'gun_trafficking', 'no_stand_your_ground', 'buyer_regulations', 'possession_regulations']
 
     # for law in lawtype:

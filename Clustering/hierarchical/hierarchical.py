@@ -1,5 +1,5 @@
 #Isavannah Reyes
-#Hierarchical clustering attempts (fun)
+#Hierarchical clustering of overall data
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,8 +7,6 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.cluster.hierarchy import cophenet
 from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import fcluster
-
-
 
 #Pre: String
 #Post: Dict
@@ -65,6 +63,9 @@ def merge_data(gunlawCounts_perStateYearDict, massshootingCounts_perStateYearDic
     return np.array(count_xy),labels
 
 def plot_dendrogram(*args, **kwargs):
+    '''Plot dendogram'''
+
+    #max_d for clusters
     max_d = kwargs.pop('max_d', None)
     if max_d and 'color_threshold' not in kwargs:
         kwargs['color_threshold'] = max_d
@@ -118,18 +119,8 @@ if __name__ == '__main__':
     #Closer to 1 preserves original distances
     #print(c)# 0.893389181942
 
-    #print (Z[:20])
-
-    # idxs = [77, 58, 71]
-    # idxs_1 = [186,83,167]
-    # plt.figure(figsize=(10, 8))
-    # plt.scatter(count_xy[:, 0], count_xy[:, 1])  # plot all points
-    # plt.scatter(count_xy[idxs, 0], count_xy[idxs, 1], c='r')  # plot interesting points in red again
-    # plt.scatter(count_xy[idxs_1, 0], count_xy[idxs_1, 1], c='y')  # plot interesting points in red again
-    #
-    # plt.show()
-
     max_d = 70
+
     # calculate full dendrogram
     plot_dendrogram(
         Z,
@@ -147,6 +138,7 @@ if __name__ == '__main__':
     clusters = fcluster(Z, max_d, criterion='distance')
     #print(clusters)#agrees with three clusters
 
+    #Plot clusters based on dendogram
     plt.figure(figsize=(10, 8))
     plt.scatter(count_xy[:, 0], count_xy[:, 1], c=clusters, cmap='tab10')  # plot points with cluster dependent colors
     plt.title("Clusters based on Hierarchical Clustering")
